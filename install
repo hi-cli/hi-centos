@@ -36,7 +36,7 @@ function run() {
   yum -y install zsh
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-  yum -y install vim git python pip python-pip python-m2crypto privoxy gcc g++
+  yum -y install vim git python pip python-pip python-m2crypto privoxy gcc g++ ansible
   pip install --upgrade pip
   result=$?
 
