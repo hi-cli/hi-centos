@@ -48,7 +48,10 @@ function run()
   systemctl enable firewalld
   
   if [ "${port}" != "" ]; then
-    firewall-cmd --zone=public --add-port=$port/tcp --permanent
+    if [ "${ssh}" != "" ]; then
+      semanage port -a -t ssh_port_t -p tcp ${port}
+    fi
+    firewall-cmd --zone=public --add-port=${port}/tcp --permanent
     cli="open firewall port: ${port}"
   elif [ "${ports}" != "" ]; then
     cli="open firewall port: ${ports}"
