@@ -1,0 +1,71 @@
+#!/bin/bash
+###############################################################################
+# Project: hi-cli
+# Description: The cross platform development toolkit - hi-cli
+# Author: John Deng (john.deng@outlook.com)
+#
+# Copyright (c) 2014-2017 John Deng (john.deng@outlook.com)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Author: John Deng (john.deng@outlook.com)
+# Updated: Thu Mar 30 17:44:12 CST 2017
+# Module: centos
+# Submodule: 
+# Command: firewall
+###############################################################################
+
+source "${HI_CLI_HOME}/bin/colors"
+source "${HI_CLI_HOME}/bin/clap"
+source "${HI_CLI_HOME}/bin/logging"
+
+###############################################################################
+function run()
+{
+  if [ "$port" == "" ] && [ "$ports" == "" ]; then
+    echo please specify port, e.g. 
+    echo usage:
+    echo $0 port=123
+    echo $0 ports='"'11 22 33'"'
+    exit 1
+  fi
+
+  iptables -A INPUT -p tcp --dport $port -j ACCEPT
+  iptables -A OUTPUT -p tcp --dport $port -j ACCEPT
+
+  systemctl unmask firewalld
+  systemctl start firewalld
+  systemctl enable firewalld
+  
+  if [ "$port" != "" ]; then
+    firewall-cmd --zone=public --add-port=$port/tcp --permanent
+    cli="open firewall port: ${port}"
+  else if [ "$ports" != "" ]; then
+    cli="open firewall port: ${ports}"
+    arr=($ports)
+    for i in "${arr[@]}"
+    do
+      echo open port $i
+      firewall-cmd --zone=public --add-port=$i/tcp --permanent
+    done
+  else
+    exit 1  
+  fi
+  
+  firewall-cmd --reload
+  result=$?
+
+  eval $1="\${result}"
+  eval $2="\${cli
+}
+
