@@ -40,8 +40,13 @@ function run()
     exit 1
   fi
 
-  iptables -A INPUT -p tcp --dport $port -j ACCEPT
-  iptables -A OUTPUT -p tcp --dport $port -j ACCEPT
+  if [ "${protocol}" == "" ]; 
+  then
+    protocol=tcp
+  fi
+
+  iptables -A INPUT -p ${protocol} --dport $port -j ACCEPT
+  iptables -A OUTPUT -p ${protocol} --dport $port -j ACCEPT
 
   systemctl unmask firewalld
   systemctl start firewalld
@@ -49,9 +54,9 @@ function run()
   
   if [ "${port}" != "" ]; then
     if [ "${ssh}" != "" ]; then
-      semanage port -a -t ssh_port_t -p tcp ${port}
+      semanage port -a -t ssh_port_t -p ${protocol} ${port}
     fi
-    firewall-cmd --zone=public --add-port=${port}/tcp --permanent
+    firewall-cmd --zone=public --add-port=${port}/${protocol} --permanent
     cli="open firewall port: ${port}"
   elif [ "${ports}" != "" ]; then
     cli="open firewall port: ${ports}"
@@ -59,7 +64,7 @@ function run()
     for i in "${arr[@]}"
     do
       log_info open port $i
-      firewall-cmd --zone=public --add-port=$i/tcp --permanent
+      firewall-cmd --zone=public --add-port=$i/${protocol} --permanent
     done
   else
     exit 1  

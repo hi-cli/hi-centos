@@ -32,11 +32,7 @@ source "${HI_CLI_HOME}/bin/logging"
 function run() {
   cli="install common tools"
 
-  log_debug "install zsh and oh-my-zsh"
-  yum -y install zsh
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-
-  yum -y install vim git python pip python-pip python-m2crypto privoxy gcc g++ ansible
+  yum -y install python-m2crypto privoxy gcc g++ ansible
   pip install --upgrade pip
   result=$?
 
