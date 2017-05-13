@@ -40,13 +40,22 @@ function run()
     exit 1
   fi
 
-  if [ "${protocol}" == "" ]; 
+  if [ "${udp}" != "" ];
   then
+    protocol=udp
+  else
     protocol=tcp
   fi
 
-  iptables -A INPUT -p ${protocol} --dport $port -j ACCEPT
-  iptables -A OUTPUT -p ${protocol} --dport $port -j ACCEPT
+  if [ "${multiport}" != "" ];
+  then
+    iptables -A INPUT -p ${protocol} --match multiport --dports ${port} -j ACCEPT
+    iptables -A OUTPUT -p ${protocol} --match multiport --dports ${port} -j ACCEPT
+  else
+
+    iptables -A INPUT -p ${protocol} --dport ${port} -j ACCEPT
+    iptables -A OUTPUT -p ${protocol} --dport ${port} -j ACCEPT
+  fi
 
   systemctl unmask firewalld
   systemctl start firewalld
