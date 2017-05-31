@@ -22,57 +22,26 @@
 # Updated: Thu Mar 30 17:44:12 CST 2017
 # Module: centos
 # Submodule: 
-# Command: firewall
+# Command: install
 ###############################################################################
 
 source "${HI_CLI_HOME}/bin/colors"
 source "${HI_CLI_HOME}/bin/clap"
 source "${HI_CLI_HOME}/bin/logging"
-
 ###############################################################################
-function run()
-{
-  if [ "$port" == "" ] && [ "$ports" == "" ]; then
-    echo please specify port, e.g. 
-    echo usage:
-    echo $0 port=123
-    echo $0 ports='"'11 22 33'"'
-    exit 1
-  fi
+function run() {
+  cli="show system logs"
 
-  if [ "${udp}" != "" ];
-  then
-    protocol=udp
-  else
-    protocol=tcp
-  fi
+  unit=${arg3}.service
 
-  systemctl unmask firewalld
-  systemctl start firewalld
-  systemctl enable firewalld
-  
-  if [ "${port}" != "" ]; then
-    if [ "${ssh}" != "" ]; then
-      semanage port -a -t ssh_port_t -p ${protocol} ${port}
-    fi
-    firewall-cmd --zone=public --add-port=${port}/${protocol} --permanent
-    cli="open firewall port: ${port}"
-  elif [ "${ports}" != "" ]; then
-    cli="open firewall port: ${ports}"
-    arr=($ports)
-    for i in "${arr[@]}"
-    do
-      log_info open port $i
-      firewall-cmd --zone=public --add-port=$i/${protocol} --permanent
-    done
-  else
-    exit 1  
-  fi
-  
-  firewall-cmd --reload
-  result=$?
+  ts=$(systemctl show -p ActiveEnterTimestamp ${unit})
+
+  log_debug "${ts}"
+
+  journalctl -u ${unit} --since="$(echo ${ts} | awk '{print $2 " " $3}')"
 
   eval $1="\${result}"
   eval $2="\${cli}"
 }
 
+###############################################################################
